@@ -1,6 +1,29 @@
 import streamlit as st
 from openai import OpenAI
 
+import streamlit as st
+
+from supabase import create_client, Client
+
+@st.cache_resource
+def init_connection():
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    return create_client(url,key)
+
+# Initialize connection.
+supabase = init_connection()
+
+@st.cache(ttl=600)
+def run_query():
+    return supabase.table("pets").select("*").execute()
+
+rows = run_query()
+
+# Print results.
+for row in rows.data:
+    st.write(f"{row['name']} has a :{row['pet']}:")
+
 # Show title and description.
 st.title("💬 Chatbot")
 st.write(
